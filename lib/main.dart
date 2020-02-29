@@ -3,7 +3,8 @@
 // found in the LICENSE file.
 
 import 'package:flutter/material.dart';
-import 'package:english_words/english_words.dart';
+import 'connector.dart';
+import 'websocket.dart';
 
 void main() => runApp(MyApp());
 
@@ -11,50 +12,110 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: "Startup Name Generator",
-      home: RandomWords(),
-    );
+        title: "Prueba",
+        theme: ThemeData(
+          primarySwatch: Colors.blue,
+        ),
+        home: MyHomePage(title: 'client socket test'),
+        );
   }
 }
 
-class RandomWordsState extends State<RandomWords> {
-  final _suggestions = <WordPair>[];
-  final _biggerFont = const TextStyle(fontSize: 18.0);
+class MyHomePage extends StatefulWidget {
+  MyHomePage({Key key, this.title}) : super(key: key);
+  final String title;
+
   @override
-  Widget build(BuildContext context) {
+  _MyHomePageState createState() => _MyHomePageState();
+}
+
+class _MyHomePageState extends State<MyHomePage> {
+  final myController = TextEditingController();
+
+  @override
+  Widget build(BuildContext context){
     return Scaffold(
       appBar: AppBar(
-        title: Text("Startup Name Generator"),
+        title: Text(widget.title),
       ),
-      body: _buildSuggestions(),
-    );
-  }
-  
-  Widget _buildSuggestions(){
-    return ListView.builder(
-      padding: const EdgeInsets.all(16.0),
-      itemBuilder: (context, i) {
-        if(i.isOdd) return Divider();
-
-        final index = i ~/ 2;
-        if(index >= _suggestions.length){
-          _suggestions.addAll(generateWordPairs().take(10));
-        }
-        return _buildRow(_suggestions[index]);
-      });
-      }
-
-      Widget _buildRow(WordPair pair) {
-        return ListTile(
-          title: Text(
-            pair.asPascalCase,
-            style: _biggerFont,
+       body: ListView(
+        padding: const EdgeInsets.all(16.0),
+        children: <Widget>[
+          Text(
+            'Connection status: $connected',
+            textAlign: TextAlign.center,
+            overflow: TextOverflow.ellipsis,
+            style: TextStyle(fontWeight: FontWeight.bold),
           ),
-        );
-      }
+          Text(
+            'Enter the server IP:',
+            textAlign: TextAlign.center,
+            overflow: TextOverflow.ellipsis,
+            style: TextStyle(fontWeight: FontWeight.bold),
+          ),
+          Container(
+            margin: const EdgeInsets.all(13.0),
+            child: TextField(
+              controller: myController,
+            ),
+          ),
+          Container(
+            margin: const EdgeInsets.all(13.0),
+            child: RaisedButton(
+                onPressed: () {
+                  print("click: connect");
+                  connect();
+                },
+                child: Text("connect to server")),
+          ),
+          Container(
+            margin: const EdgeInsets.all(13.0),
+            child: RaisedButton(
+                onPressed: () {
+                  print("click: send");
+                  sendData();
+                },
+                child: Text("send data to server")),
+          ),
+          Container(
+            margin: const EdgeInsets.all(13.0),
+            child: RaisedButton(
+                onPressed: () {
+                  print("click: disconnect");
+                  disconnect();
+                },
+                child: Text("disconnect")),
+          ),
+        ],
+    ),
+    );
 }
 
-class RandomWords extends StatefulWidget {
-  @override
-  RandomWordsState createState() => RandomWordsState();
+bool connected = false;
+  SocketBat connector;
+
+  void connect() {
+    connector = SocketBat(myController.text);
+    connector.connect().then((v) {
+      print("connnected:$v");
+      setState(() {
+        connected = v;
+      });
+    });
+  }
+
+  void sendData() {
+    if (connected && connector != null) {
+      connector.sendMessage(List.filled(1000, 1));
+    }
+  }
+
+  void disconnect() {
+    if (connector != null) {
+      connector.disconnect();
+      connector = null;
+      connected = false;
+      setState(() {});
+    }
+  }
 }
