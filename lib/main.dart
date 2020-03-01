@@ -3,10 +3,22 @@
 // found in the LICENSE file.
 
 import 'package:flutter/material.dart';
-import 'connector.dart';
+import 'package:prueba_app/socket_io.dart';
+//import 'connector.dart';
 //import 'websocket.dart';
+//import 'chat.dart';
+import 'socket_io.dart';
 
-void main() => runApp(MyApp());
+void main() => runApp(MyMaterial());
+
+class MyMaterial extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      debugShowCheckedModeBanner: false,
+    );
+  }
+}
 
 class MyApp extends StatelessWidget {
   @override
@@ -73,7 +85,7 @@ class _MyHomePageState extends State<MyHomePage> {
             child: RaisedButton(
                 onPressed: () {
                   print("click: send");
-                  sendData();
+                  //sendData();
                 },
                 child: Text("send data to server")),
           ),
@@ -82,7 +94,7 @@ class _MyHomePageState extends State<MyHomePage> {
             child: RaisedButton(
                 onPressed: () {
                   print("click: disconnect");
-                  disconnect();
+                  //disconnect();
                 },
                 child: Text("disconnect")),
           ),
@@ -94,7 +106,11 @@ class _MyHomePageState extends State<MyHomePage> {
 bool connected = false;
   SocketBat connector;
 
-  void connect() {
+void connect () {
+  connector = SocketBat();
+  connector.connect();
+}
+ /* void connect() {
     connector = SocketBat(myController.text);
     connector.connect().then((v) {
       print("connnected:$v");
@@ -117,5 +133,5 @@ bool connected = false;
       connected = false;
       setState(() {});
     }
-  }
+  }*/
 }
