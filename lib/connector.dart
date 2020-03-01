@@ -1,6 +1,4 @@
 import 'dart:io';
-import 'package:simple_permissions/simple_permissions.dart';
-
 class SocketBat {
   static const bool DEBUG = true;
 
@@ -12,12 +10,7 @@ class SocketBat {
 
   Future<bool> connect() async {
     try {
-      PermissionStatus permissionResult =
-          await SimplePermissions.requestPermission(
-              Permission.ReadExternalStorage);
-      if (permissionResult == PermissionStatus.authorized) {
         SecurityContext securityContext = SecurityContext();
-        securityContext.setTrustedCertificates("/storage/emulated/0/Download/server-crt.pem");
         _secureSocket = await SecureSocket.connect(
           _host,
           PORT,
@@ -25,7 +18,6 @@ class SocketBat {
           onBadCertificate: _onBadCertificate,
           timeout: Duration(seconds: 10),
         );
-      }
     } on SocketException catch (e) {
       print(e.toString());
       return false;
